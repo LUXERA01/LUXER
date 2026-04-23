@@ -383,6 +383,295 @@ header { text-align: center; padding: 38px 20px 22px; }
   background: linear-gradient(transparent, rgba(179,0,255,.05));
   pointer-events: none; z-index: 0;
 }
+
+/* ── TAB BAR ─────────────────────────────────────────────────────────────── */
+.tab-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+  height: 72px;
+  background: rgba(6, 2, 20, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(179,0,255,.22);
+  display: flex; align-items: stretch;
+  padding: 0 8px env(safe-area-inset-bottom, 0px);
+  box-shadow: 0 -4px 40px rgba(179,0,255,.15), 0 -1px 0 rgba(255,45,120,.1);
+}
+.tab-bar::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--pink) 25%, var(--purple) 50%, var(--cyan) 75%, transparent 100%);
+  opacity: .7;
+}
+
+.tab-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 5px; background: none; border: none; cursor: pointer;
+  position: relative; border-radius: 16px; margin: 6px 4px;
+  transition: all .25s cubic-bezier(.34,1.56,.64,1);
+  touch-action: manipulation;
+  overflow: hidden;
+}
+.tab-btn::before {
+  content: ''; position: absolute; inset: 0; border-radius: 14px;
+  background: transparent;
+  transition: background .25s ease;
+}
+.tab-btn.active::before {
+  background: rgba(179,0,255,.13);
+  box-shadow: inset 0 0 16px rgba(179,0,255,.1);
+}
+.tab-btn:active { transform: scale(.92); }
+
+.tab-icon {
+  width: 26px; height: 26px; position: relative; z-index: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: filter .3s ease, transform .3s cubic-bezier(.34,1.56,.64,1);
+}
+.tab-btn.active .tab-icon {
+  filter: drop-shadow(0 0 8px var(--pink)) drop-shadow(0 0 16px var(--purple));
+  transform: translateY(-2px) scale(1.12);
+}
+
+.tab-label {
+  font-family: 'Exo 2', sans-serif; font-size: 10px; font-weight: 600;
+  letter-spacing: .6px; text-transform: uppercase;
+  color: var(--muted); position: relative; z-index: 1;
+  transition: color .25s ease;
+}
+.tab-btn.active .tab-label { color: var(--pink); text-shadow: 0 0 8px rgba(255,45,120,.5); }
+
+/* animated indicator dot */
+.tab-dot {
+  position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%) scaleX(0);
+  width: 18px; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--pink), var(--purple));
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: 0 0 6px var(--pink);
+}
+.tab-btn.active .tab-dot { transform: translateX(-50%) scaleX(1); }
+
+/* ── PAGES ───────────────────────────────────────────────────────────────── */
+.page {
+  display: none; animation: pageIn .38s cubic-bezier(.34,.5,.66,1) both;
+}
+.page.active { display: block; }
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* wrapper needs bottom padding for tab bar */
+.wrapper { padding-bottom: 88px !important; }
+
+/* ── INFO PAGE ───────────────────────────────────────────────────────────── */
+.info-page { padding: 0 14px 20px; max-width: 520px; margin: 0 auto; }
+
+/* hero banner */
+.info-hero {
+  text-align: center; padding: 10px 0 28px;
+  position: relative;
+}
+.info-hero-title {
+  font-family: 'Orbitron', monospace; font-size: clamp(11px,3vw,13px);
+  font-weight: 800; letter-spacing: 5px; color: var(--cyan);
+  text-transform: uppercase; margin-bottom: 10px;
+  text-shadow: 0 0 14px rgba(0,229,255,.5);
+}
+.info-hero-sub {
+  font-size: 14px; font-weight: 300; color: var(--muted);
+  line-height: 1.7; max-width: 320px; margin: 0 auto;
+}
+
+/* step timeline */
+.timeline { display: flex; flex-direction: column; gap: 0; margin-bottom: 28px; }
+
+.timeline-item {
+  display: flex; gap: 16px; position: relative;
+  animation: fadeUp .45s ease both;
+}
+.timeline-item:nth-child(1) { animation-delay: .05s; }
+.timeline-item:nth-child(2) { animation-delay: .12s; }
+.timeline-item:nth-child(3) { animation-delay: .19s; }
+.timeline-item:nth-child(4) { animation-delay: .26s; }
+.timeline-item:nth-child(5) { animation-delay: .33s; }
+.timeline-item:nth-child(6) { animation-delay: .40s; }
+.timeline-item:nth-child(7) { animation-delay: .47s; }
+.timeline-item:nth-child(8) { animation-delay: .54s; }
+
+.tl-left {
+  display: flex; flex-direction: column; align-items: center;
+  flex-shrink: 0; width: 42px;
+}
+.tl-num {
+  width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 900;
+  position: relative; z-index: 1;
+  border: 1.5px solid;
+}
+.tl-num.c1 { background: rgba(255,45,120,.12); border-color: rgba(255,45,120,.5); color: var(--pink); box-shadow: 0 0 16px rgba(255,45,120,.2); }
+.tl-num.c2 { background: rgba(179,0,255,.12); border-color: rgba(179,0,255,.5); color: var(--purple); box-shadow: 0 0 16px rgba(179,0,255,.2); }
+.tl-num.c3 { background: rgba(0,229,255,.12); border-color: rgba(0,229,255,.5); color: var(--cyan); box-shadow: 0 0 16px rgba(0,229,255,.2); }
+.tl-num.c4 { background: rgba(255,45,120,.12); border-color: rgba(255,45,120,.5); color: var(--pink); box-shadow: 0 0 16px rgba(255,45,120,.2); }
+.tl-num.c5 { background: rgba(179,0,255,.12); border-color: rgba(179,0,255,.5); color: var(--purple); box-shadow: 0 0 16px rgba(179,0,255,.2); }
+.tl-num.c6 { background: rgba(0,229,255,.12); border-color: rgba(0,229,255,.5); color: var(--cyan); box-shadow: 0 0 16px rgba(0,229,255,.2); }
+.tl-num.c7 { background: rgba(255,165,0,.12); border-color: rgba(255,165,0,.5); color: #ffa500; box-shadow: 0 0 16px rgba(255,165,0,.2); }
+.tl-num.c8 { background: rgba(255,45,120,.12); border-color: rgba(255,45,120,.5); color: var(--pink); box-shadow: 0 0 16px rgba(255,45,120,.2); }
+
+.tl-line {
+  flex: 1; width: 1.5px; min-height: 24px;
+  background: linear-gradient(180deg, rgba(179,0,255,.4), rgba(0,229,255,.15));
+  margin: 3px 0;
+}
+.timeline-item:last-child .tl-line { display: none; }
+
+.tl-body {
+  flex: 1; padding: 8px 0 28px;
+}
+.tl-title {
+  font-family: 'Exo 2', sans-serif; font-size: 14px; font-weight: 600;
+  color: var(--text); margin-bottom: 4px; line-height: 1.4;
+}
+.tl-desc {
+  font-size: 12px; font-weight: 300; color: var(--muted); line-height: 1.65;
+}
+
+/* info section blocks */
+.info-section {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px; overflow: hidden; position: relative;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 6px 36px rgba(179,0,255,.08), inset 0 0 0 1px rgba(255,45,120,.04);
+  margin-bottom: 16px;
+  animation: fadeUp .4s ease both;
+}
+.info-section::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--pink) 35%, var(--cyan) 65%, transparent);
+  opacity: .5; z-index: 2;
+}
+
+.info-section-head {
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px 18px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.info-sec-icon {
+  width: 44px; height: 44px; border-radius: 14px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.icon-pink   { background: rgba(255,45,120,.12); border: 1px solid rgba(255,45,120,.3); box-shadow: 0 0 14px rgba(255,45,120,.15); }
+.icon-purple { background: rgba(179,0,255,.12);  border: 1px solid rgba(179,0,255,.3);  box-shadow: 0 0 14px rgba(179,0,255,.15); }
+.icon-cyan   { background: rgba(0,229,255,.12);  border: 1px solid rgba(0,229,255,.3);  box-shadow: 0 0 14px rgba(0,229,255,.15); }
+.icon-gold   { background: rgba(255,165,0,.12);  border: 1px solid rgba(255,165,0,.3);  box-shadow: 0 0 14px rgba(255,165,0,.15); }
+
+.info-sec-title {
+  font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 800;
+  letter-spacing: 2.5px; text-transform: uppercase; color: #fff;
+}
+.info-sec-sub {
+  font-size: 11px; font-weight: 300; color: var(--muted); margin-top: 2px;
+}
+
+.info-section-body { padding: 16px 18px 18px; }
+
+/* data items required */
+.data-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.data-chip {
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+  border-radius: 10px; padding: 10px 12px;
+  font-size: 12px; font-weight: 400; color: var(--text);
+  display: flex; align-items: center; gap: 8px;
+  transition: all .2s ease;
+}
+.data-chip:hover { background: rgba(0,229,255,.07); border-color: rgba(0,229,255,.2); color: var(--cyan); }
+.data-chip-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.dot-pink   { background: var(--pink);   box-shadow: 0 0 5px var(--pink); }
+.dot-purple { background: var(--purple); box-shadow: 0 0 5px var(--purple); }
+.dot-cyan   { background: var(--cyan);   box-shadow: 0 0 5px var(--cyan); }
+.data-chip.full { grid-column: 1 / -1; }
+
+/* delivery rows */
+.del-info-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.05);
+  transition: all .2s;
+}
+.del-info-row:last-child { border-bottom: none; }
+.del-info-row:hover { padding-left: 4px; }
+.del-info-left { display: flex; align-items: center; gap: 10px; }
+.del-info-icon { font-size: 18px; }
+.del-info-name { font-size: 13px; color: var(--text); font-weight: 400; }
+.del-info-note { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.del-info-val  { font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 700; color: var(--cyan); text-shadow: 0 0 6px rgba(0,229,255,.4); }
+
+/* payment steps */
+.pay-steps { display: flex; flex-direction: column; gap: 0; }
+.pay-step {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.pay-step:last-child { border-bottom: none; }
+.pay-step-num {
+  width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Orbitron', monospace; font-size: 10px; font-weight: 900;
+  background: rgba(255,45,120,.12); border: 1px solid rgba(255,45,120,.3); color: var(--pink);
+}
+.pay-step-text { font-size: 12.5px; color: var(--muted); line-height: 1.65; padding-top: 4px; }
+.pay-step-text b { color: var(--text); font-weight: 600; }
+
+/* important notice */
+.notice-box {
+  background: linear-gradient(135deg, rgba(255,45,120,.07), rgba(179,0,255,.05));
+  border: 1px solid rgba(255,45,120,.28);
+  border-radius: 16px; padding: 16px 18px;
+  margin-bottom: 16px;
+  position: relative; overflow: hidden;
+  animation: fadeUp .4s ease .3s both;
+}
+.notice-box::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--pink), transparent);
+  opacity: .6;
+}
+.notice-head {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.notice-icon { font-size: 20px; }
+.notice-title {
+  font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 800;
+  letter-spacing: 2px; color: var(--pink); text-transform: uppercase;
+  text-shadow: 0 0 8px rgba(255,45,120,.4);
+}
+.notice-text {
+  font-size: 12.5px; font-weight: 300; color: var(--muted); line-height: 1.7;
+}
+.notice-text b { color: var(--text); font-weight: 500; }
+
+/* contact cta */
+.cta-block {
+  margin-top: 8px; margin-bottom: 8px;
+  animation: fadeUp .4s ease .45s both;
+}
+.btn-cta {
+  width: 100%; padding: 18px;
+  background: linear-gradient(135deg, var(--pink) 0%, #d6005e 50%, var(--purple) 100%);
+  border: none; border-radius: 16px; color: #fff;
+  font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 800;
+  letter-spacing: 2px; cursor: pointer;
+  box-shadow: 0 8px 32px rgba(255,45,120,.38), 0 0 20px rgba(179,0,255,.2), inset 0 1px 0 rgba(255,255,255,.12);
+  transition: all .2s cubic-bezier(.34,.5,.66,1);
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  text-transform: uppercase;
+  animation: btnGlow 2.5s ease-in-out infinite;
+  touch-action: manipulation;
+}
+.btn-cta:active { transform: scale(.96); }
 </style>
 </head>
 <body>
@@ -395,10 +684,205 @@ header { text-align: center; padding: 38px 20px 22px; }
   <header>
     <div class="logo">LUXERA</div>
     <div class="logo-line"></div>
-    <div class="hero-title">Сувенирные карты</div>
-    <div class="hero-sub">Коллекционные изделия премиального качества</div>
+    <div class="hero-title" id="pageSubtitle">Сувенирные карты</div>
+    <div class="hero-sub" id="pageSubDesc">Коллекционные изделия премиального качества</div>
   </header>
-  <div class="cards" id="cards"></div>
+
+  <!-- PAGE: CATALOG -->
+  <div class="page active" id="pageCatalog">
+    <div class="cards" id="cards"></div>
+  </div>
+
+  <!-- PAGE: INFO -->
+  <div class="page" id="pageInfo">
+    <div class="info-page">
+
+      <div class="info-hero">
+        <div class="info-hero-title">Как мы работаем</div>
+        <div class="info-hero-sub">Простой и прозрачный процесс от заявки до получения</div>
+      </div>
+
+      <!-- TIMELINE -->
+      <div class="section-lbl" style="margin-bottom:16px">Процесс заказа</div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="tl-left"><div class="tl-num c1">1</div><div class="tl-line"></div></div>
+          <div class="tl-body"><div class="tl-title">Вы отправляете данные</div><div class="tl-desc">Фото, ФИО, дату рождения и остальные необходимые данные — всё отправляется в Telegram</div></div>
+        </div>
+        <div class="timeline-item">
+          <div class="tl-left"><div class="tl-num c2">2</div><div class="tl-line"></div></div>
+          <div class="tl-body"><div class="tl-title">Готовим макет</div><div class="tl-desc">Мы подготавливаем электронный макет по вашим данным и отправляем вам на согласование</div></div>
+        </div>
+        <div class="timeline-item">
+          <div class="tl-left"><div class="tl-num c3">3</div><div class="tl-line"></div></div>
+          <div class="tl-body"><div class="tl-title">Согласование</div><div class="tl-desc">Проверяете макет, при необходимости вносим правки — всё должно быть идеально</div></div>
+        </div>
+        <div class="timeline-item">
+          <div class="tl-left"><div class="tl-num c4">4</div><div class="tl-line"></div></div>
+          <div class="tl-body"><div class="tl-title">Предоплата 50%</div><div class="tl-desc">После согласования вы вносите предоплату — это запускает заказ в изготовление</div></div>
+        </div>
+        <div class="timeline-item">
+          <div class="tl-left"><div class="tl-num c5">5</div><div class="tl-line"></div></div>
+          <div class="tl-body"><div class="tl-title">Изготовление ~24 часа</div><div class="tl-desc">Заказ уходит в производство. Обычно занимает около 24 часов</div></div>
+        </div>
+        <div class="timeline-item">
+          <div class="tl-left"><div class="tl-num c6">6</div><div class="tl-line"></div></div>
+          <div class="tl-body"><div class="tl-title">Фото и видео готового изделия</div><div class="tl-desc">Присылаем вам фото и видео готового заказа для финальной проверки</div></div>
+        </div>
+        <div class="timeline-item">
+          <div class="tl-left"><div class="tl-num c7">7</div><div class="tl-line"></div></div>
+          <div class="tl-body"><div class="tl-title">Оплата оставшейся части</div><div class="tl-desc">Вы оплачиваете оставшиеся 50% после того, как увидели готовое изделие</div></div>
+        </div>
+        <div class="timeline-item">
+          <div class="tl-left"><div class="tl-num c8">8</div><div class="tl-line"></div></div>
+          <div class="tl-body"><div class="tl-title">Отправка доставкой</div><div class="tl-desc">Отправляем заказ через СДЭК. Срок доставки по России 3–5 дней</div></div>
+        </div>
+      </div>
+
+      <!-- REQUIRED DATA -->
+      <div class="info-section" style="animation-delay:.05s">
+        <div class="info-section-head">
+          <div class="info-sec-icon icon-cyan">📋</div>
+          <div>
+            <div class="info-sec-title">Что нужно для заказа</div>
+            <div class="info-sec-sub">Данные, которые вы присылаете нам</div>
+          </div>
+        </div>
+        <div class="info-section-body">
+          <div class="data-grid">
+            <div class="data-chip"><span class="data-chip-dot dot-pink"></span>Фото</div>
+            <div class="data-chip"><span class="data-chip-dot dot-purple"></span>ФИО</div>
+            <div class="data-chip"><span class="data-chip-dot dot-cyan"></span>Дата рождения</div>
+            <div class="data-chip"><span class="data-chip-dot dot-pink"></span>Регион рождения</div>
+            <div class="data-chip"><span class="data-chip-dot dot-purple"></span>Дата выдачи</div>
+            <div class="data-chip"><span class="data-chip-dot dot-cyan"></span>Место выдачи</div>
+            <div class="data-chip full"><span class="data-chip-dot dot-pink"></span>Подпись (если нужна для макета)</div>
+            <div class="data-chip full"><span class="data-chip-dot dot-purple"></span>Доп. данные по необходимости</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DELIVERY -->
+      <div class="info-section" style="animation-delay:.15s">
+        <div class="info-section-head">
+          <div class="info-sec-icon icon-purple">🚀</div>
+          <div>
+            <div class="info-sec-title">Доставка и сроки</div>
+            <div class="info-sec-sub">Изготовление и отправка по всему миру</div>
+          </div>
+        </div>
+        <div class="info-section-body">
+          <div class="del-info-row">
+            <div class="del-info-left">
+              <span class="del-info-icon">⚡</span>
+              <div><div class="del-info-name">Изготовление</div><div class="del-info-note">После внесения предоплаты</div></div>
+            </div>
+            <div class="del-info-val">~24 ч</div>
+          </div>
+          <div class="del-info-row">
+            <div class="del-info-left">
+              <span class="del-info-icon">🇷🇺</span>
+              <div><div class="del-info-name">Доставка по России</div><div class="del-info-note">СДЭК</div></div>
+            </div>
+            <div class="del-info-val">600 ₽</div>
+          </div>
+          <div class="del-info-row">
+            <div class="del-info-left">
+              <span class="del-info-icon">📦</span>
+              <div><div class="del-info-name">Срок по РФ</div><div class="del-info-note">СДЭК</div></div>
+            </div>
+            <div class="del-info-val">3–5 дней</div>
+          </div>
+          <div class="del-info-row">
+            <div class="del-info-left">
+              <span class="del-info-icon">✈️</span>
+              <div><div class="del-info-name">За границу</div><div class="del-info-note">Условия обсуждаются</div></div>
+            </div>
+            <div class="del-info-val">По запросу</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAYMENT -->
+      <div class="info-section" style="animation-delay:.25s">
+        <div class="info-section-head">
+          <div class="info-sec-icon icon-gold">💳</div>
+          <div>
+            <div class="info-sec-title">Оплата</div>
+            <div class="info-sec-sub">Схема оплаты 50% + 50%</div>
+          </div>
+        </div>
+        <div class="info-section-body">
+          <div class="pay-steps">
+            <div class="pay-step">
+              <div class="pay-step-num">01</div>
+              <div class="pay-step-text">Сначала <b>согласовываем макет</b> — правки вносятся до внесения оплаты</div>
+            </div>
+            <div class="pay-step">
+              <div class="pay-step-num">02</div>
+              <div class="pay-step-text">После согласования вносится <b>предоплата 50%</b> — это запускает производство и закупку материалов</div>
+            </div>
+            <div class="pay-step">
+              <div class="pay-step-num">03</div>
+              <div class="pay-step-text">По готовности показываем <b>фото и видео</b> готового изделия</div>
+            </div>
+            <div class="pay-step">
+              <div class="pay-step-num">04</div>
+              <div class="pay-step-text">После просмотра результата вы вносите <b>оставшиеся 50%</b> и заказ отправляется</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTICE -->
+      <div class="notice-box">
+        <div class="notice-head">
+          <span class="notice-icon">⚠️</span>
+          <div class="notice-title">Важно знать</div>
+        </div>
+        <div class="notice-text">
+          LUXERA изготавливает <b>исключительно сувенирную продукцию</b> по индивидуальным данным клиента. Работаем <b>только по предоплате 50%</b> — это обязательное условие, так как средства идут на закупку материалов и запуск производства. Иного способа работы у нас нет.
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="cta-block">
+        <button class="btn-cta" onclick="goOrder()">
+          <span>Написать нам</span>
+          <span>→</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tab-btn active" id="tab0" onclick="switchTab(0)">
+    <div class="tab-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="7" height="9" rx="1.5"/>
+        <rect x="15" y="3" width="7" height="5" rx="1.5"/>
+        <rect x="15" y="12" width="7" height="9" rx="1.5"/>
+        <rect x="2" y="16" width="7" height="5" rx="1.5"/>
+      </svg>
+    </div>
+    <div class="tab-label">Каталог</div>
+    <div class="tab-dot"></div>
+  </button>
+  <button class="tab-btn" id="tab1" onclick="switchTab(1)">
+    <div class="tab-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    </div>
+    <div class="tab-label">О нас</div>
+    <div class="tab-dot"></div>
+  </button>
 </div>
 
 <!-- MODAL -->
@@ -578,6 +1062,29 @@ function goOrder() {
   }
 }
 
+/* ── tabs ─────────────────────────────────────────────────────────────────── */
+const tabPages = [
+  { page: 'pageCatalog', title: 'Сувенирные карты', sub: 'Коллекционные изделия премиального качества' },
+  { page: 'pageInfo',    title: 'Как мы работаем',  sub: 'Прозрачный процесс от заявки до получения'  },
+];
+
+function switchTab(idx) {
+  tabPages.forEach((t, i) => {
+    const pg  = document.getElementById(t.page);
+    const btn = document.getElementById('tab' + i);
+    if (i === idx) {
+      pg.classList.add('active');
+      btn.classList.add('active');
+    } else {
+      pg.classList.remove('active');
+      btn.classList.remove('active');
+    }
+  });
+  document.getElementById('pageSubtitle').textContent = tabPages[idx].title;
+  document.getElementById('pageSubDesc').textContent  = tabPages[idx].sub;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 /* ── init ─────────────────────────────────────────────────────────────────── */
 render();
 
@@ -588,6 +1095,7 @@ if (window.Telegram?.WebApp) {
   tg.setBackgroundColor?.('#03020a');
 }
 </script>
+
 
 </body>
 </html>
