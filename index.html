@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>LUXERA — Сувенирные карты</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ── RESET & VARS ─────────────────────────────────────────────────────────── */
+:root {
+  --pink:    #ff2d78;
+  --cyan:    #00e5ff;
+  --purple:  #b300ff;
+  --bg:      #03020a;
+  --card-bg: rgba(14, 7, 33, 0.88);
+  --border:  rgba(179, 0, 255, 0.32);
+  --text:    #f0e6ff;
+  --muted:   #7a6a9a;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Exo 2', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  /* GPU layer for smooth scroll */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── BACKGROUND ──────────────────────────────────────────────────────────── */
+.space-bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 90% 55% at 15% 8%,  rgba(179,0,255,.17) 0%, transparent 60%),
+    radial-gradient(ellipse 65% 50% at 85% 85%,  rgba(255,45,120,.14) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 55% 48%,  rgba(0,229,255,.06) 0%, transparent 60%),
+    linear-gradient(180deg, #0a0418 0%, #03020a 55%, #060112 100%);
+}
+/* Pure CSS stars — no JS, no lag */
+.stars {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at  8% 12%, rgba(255,255,255,.85) 0%, transparent 100%),
+    radial-gradient(1px 1px at 22% 38%, rgba(255,255,255,.55) 0%, transparent 100%),
+    radial-gradient(1px 1px at 38%  8%, rgba(200,240,255,.75) 0%, transparent 100%),
+    radial-gradient(1px 1px at 52% 65%, rgba(255,255,255,.45) 0%, transparent 100%),
+    radial-gradient(1px 1px at 67% 28%, rgba(255,200,240,.7)  0%, transparent 100%),
+    radial-gradient(1px 1px at 78% 82%, rgba(255,255,255,.6)  0%, transparent 100%),
+    radial-gradient(1px 1px at 14% 72%, rgba(180,180,255,.65) 0%, transparent 100%),
+    radial-gradient(1px 1px at 88% 18%, rgba(255,255,255,.5)  0%, transparent 100%),
+    radial-gradient(1px 1px at 44% 90%, rgba(255,255,255,.75) 0%, transparent 100%),
+    radial-gradient(1px 1px at 92% 55%, rgba(200,255,255,.55) 0%, transparent 100%),
+    radial-gradient(1px 1px at 31% 55%, rgba(255,255,255,.4)  0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 42%, rgba(255,220,255,.5)  0%, transparent 100%);
+  animation: twinkle 5s ease-in-out infinite alternate;
+  will-change: opacity;
+}
+@keyframes twinkle { from { opacity: .65; } to { opacity: 1; } }
+
+/* ── WRAPPER ─────────────────────────────────────────────────────────────── */
+.wrapper { position: relative; z-index: 1; padding-bottom: 50px; }
+
+/* ── HEADER ──────────────────────────────────────────────────────────────── */
+header { text-align: center; padding: 38px 20px 22px; }
+
+.logo {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(30px, 9vw, 40px);
+  font-weight: 900;
+  letter-spacing: 10px;
+  background: linear-gradient(135deg, #ff2d78 0%, #b300ff 50%, #00e5ff 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: logoGlow 3.5s ease-in-out infinite alternate;
+  will-change: filter;
+}
+@keyframes logoGlow {
+  from { filter: drop-shadow(0 0 14px rgba(255,45,120,.75)); }
+  to   { filter: drop-shadow(0 0 30px rgba(0,229,255,.85)); }
+}
+.logo-line {
+  width: 56px; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--pink), var(--cyan), transparent);
+  margin: 9px auto 12px; border-radius: 2px;
+}
+.hero-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 4px; color: var(--cyan);
+  text-transform: uppercase; margin-bottom: 5px; opacity: .9;
+}
+.hero-sub {
+  font-size: 13px; font-weight: 300;
+  color: var(--muted); letter-spacing: .5px;
+}
+
+/* ── CARDS ───────────────────────────────────────────────────────────────── */
+.cards { padding: 0 14px; display: flex; flex-direction: column; gap: 18px; max-width: 520px; margin: 0 auto; }
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px; overflow: hidden;
+  position: relative;
+  /* soft backdrop only on capable devices */
+  backdrop-filter: blur(14px);
+  box-shadow: 0 6px 36px rgba(179,0,255,.1), inset 0 0 0 1px rgba(255,45,120,.06);
+  animation: fadeUp .45s ease both;
+  contain: layout style; /* limit repaint scope */
+}
+.card:nth-child(1) { animation-delay: .05s; }
+.card:nth-child(2) { animation-delay: .15s; }
+.card:nth-child(3) { animation-delay: .25s; }
+.card:nth-child(4) { animation-delay: .35s; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--pink) 35%, var(--cyan) 65%, transparent);
+  opacity: .65; z-index: 2;
+}
+
+/* badge */
+.card-badge {
+  position: absolute; top: 13px; right: 13px; z-index: 3;
+  font-family: 'Orbitron', monospace; font-size: 8px; font-weight: 700;
+  letter-spacing: 2px; padding: 4px 10px;
+  border-radius: 20px; border: 1px solid; text-transform: uppercase;
+}
+.b-std  { background: rgba(0,229,255,.1);  border-color: var(--cyan);   color: var(--cyan);   }
+.b-lux  { background: rgba(255,45,120,.1); border-color: var(--pink);   color: var(--pink);   }
+.b-prm  { background: rgba(179,0,255,.1);  border-color: var(--purple); color: var(--purple); }
+.b-vip  { background: rgba(255,165,0,.1);  border-color: #ffa500;       color: #ffa500;       }
+
+/* ── IMAGE AREA ──────────────────────────────────────────────────────────── */
+.card-img-wrap {
+  position: relative; width: 100%; height: 240px; overflow: hidden;
+  background: #090519;
+  aspect-ratio: 16 / 10;
+}
+.card-img-wrap::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 70px;
+  background: linear-gradient(transparent, var(--card-bg));
+  pointer-events: none; z-index: 1;
+}
+
+/* skeleton shimmer */
+.skeleton {
+  position: absolute; inset: 0; z-index: 0;
+  background: linear-gradient(100deg,
+    rgba(255,255,255,.03) 0%,
+    rgba(179,0,255,.09) 40%,
+    rgba(0,229,255,.07) 60%,
+    rgba(255,255,255,.03) 100%);
+  background-size: 220% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+.skeleton.hidden { opacity: 0; transition: opacity .3s; pointer-events: none; }
+@keyframes shimmer { from { background-position: -220% 0; } to { background-position: 220% 0; } }
+
+/* actual product photo */
+.prod-photo {
+  position: absolute; inset: 0; z-index: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity .35s ease;
+  will-change: opacity;
+  /* tell browser to decode off main thread */
+  decoding: async;
+}
+.prod-photo.visible { opacity: 1; }
+
+/* ── CARD BODY ───────────────────────────────────────────────────────────── */
+.card-body { padding: 14px 16px 18px; }
+.card-name  { font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 7px; line-height: 1.35; letter-spacing: .3px; }
+.card-desc  { font-size: 12px; font-weight: 300; color: var(--muted); line-height: 1.65; margin-bottom: 13px; }
+.card-price { font-family: 'Orbitron', monospace; font-size: 22px; font-weight: 900; margin-bottom: 14px;
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  filter: drop-shadow(0 0 7px rgba(255,45,120,.4));
+}
+.card-btns  { display: flex; flex-direction: column; gap: 10px; }
+
+/* ── BUTTONS ─────────────────────────────────────────────────────────────── */
+.btn {
+  flex: 1; padding: 16px 0; border: none; border-radius: 12px;
+  font-family: 'Exo 2', sans-serif; font-size: 13px; font-weight: 600;
+  cursor: pointer; letter-spacing: .4px;
+  transition: transform .12s, box-shadow .12s, filter .12s;
+  touch-action: manipulation;
+  min-height: 48px; display: flex; align-items: center; justify-content: center;
+}
+.btn:active { transform: scale(.95); }
+
+.btn-order {
+  background: linear-gradient(135deg, var(--pink) 0%, #b800a0 100%);
+  color: #fff; box-shadow: 0 4px 18px rgba(255,45,120,.38);
+}
+.btn-order:active { box-shadow: 0 2px 8px rgba(255,45,120,.25); filter: brightness(.9); }
+
+.btn-detail {
+  background: rgba(0,229,255,.07); border: 1px solid rgba(0,229,255,.3); color: var(--cyan);
+}
+.btn-detail:active { background: rgba(0,229,255,.16); }
+
+/* ── MODAL ───────────────────────────────────────────────────────────────── */
+.overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(3,2,10,.93);
+  display: none; align-items: center; justify-content: center;
+  backdrop-filter: blur(7px);
+  overflow-y: auto;
+}
+.overlay.open { display: flex; animation: overlayIn .3s ease; }
+@keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal {
+  background: linear-gradient(175deg, #110924 0%, #06031a 100%);
+  border: 1px solid rgba(179,0,255,.38);
+  border-radius: 24px;
+  width: calc(100% - 28px); max-width: 520px; max-height: 88vh;
+  overflow-y: auto; overflow-x: hidden;
+  animation: zoomIn .4s cubic-bezier(.34,1.4,.64,1);
+  position: relative; padding-bottom: 44px;
+  -webkit-overflow-scrolling: touch;
+  margin: auto;
+}
+.modal::before {
+  content: ''; position: sticky; top: 0; display: block; height: 3px;
+  background: linear-gradient(90deg, var(--pink), var(--purple), var(--cyan));
+  z-index: 10;
+  border-radius: 24px 24px 0 0;
+}
+@keyframes zoomIn { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: scale(1); } }
+
+/* scrollbar */
+.modal::-webkit-scrollbar { width: 3px; }
+.modal::-webkit-scrollbar-thumb { background: rgba(179,0,255,.35); border-radius: 4px; }
+
+.modal-handle { width: 38px; height: 4px; background: rgba(255,255,255,.18); border-radius: 4px; margin: 14px auto 0; }
+
+.modal-close {
+  position: absolute; top: 16px; right: 16px;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+  color: #fff; font-size: 15px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .18s; z-index: 5;
+}
+.modal-close:active { background: rgba(255,45,120,.3); }
+
+/* modal image */
+.modal-img-wrap {
+  position: relative; width: 100%; height: 230px; overflow: hidden;
+  margin-top: 4px;
+}
+.modal-img-wrap::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 80px;
+  background: linear-gradient(transparent, #06031a); pointer-events: none; z-index: 1;
+}
+.modal-photo {
+  width: 100%; height: 100%; object-fit: cover;
+  opacity: 0; transition: opacity .3s;
+  decoding: async;
+}
+.modal-photo.visible { opacity: 1; }
+.modal-skel { position: absolute; inset: 0; }
+
+/* modal content */
+.modal-body { padding: 0 20px 18px; }
+.modal-mbadge {
+  display: inline-block; font-family: 'Orbitron', monospace;
+  font-size: 8px; font-weight: 700; letter-spacing: 2px;
+  padding: 4px 12px; border-radius: 20px; border: 1px solid; margin-bottom: 9px;
+}
+.modal-mname  { font-family: 'Orbitron', monospace; font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 8px; line-height: 1.3; }
+.modal-mprice { font-family: 'Orbitron', monospace; font-size: 26px; font-weight: 900; margin-bottom: 16px;
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  filter: drop-shadow(0 0 10px rgba(255,45,120,.4));
+}
+.section-lbl {
+  font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700;
+  letter-spacing: 3px; color: var(--cyan); text-transform: uppercase; margin-bottom: 10px;
+}
+.feat-list { list-style: none; margin-bottom: 18px; }
+.feat-list li {
+  font-size: 13px; color: var(--text); padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,.055);
+  display: flex; align-items: center; gap: 10px;
+}
+.feat-list li::before { content: '◆'; font-size: 7px; color: var(--pink); flex-shrink: 0; }
+
+.delivery {
+  background: rgba(0,229,255,.05); border: 1px solid rgba(0,229,255,.14);
+  border-radius: 13px; padding: 14px 15px; margin-bottom: 20px;
+}
+.del-row {
+  font-size: 12px; color: var(--muted); padding: 5px 0;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.del-row span:last-child { color: var(--cyan); font-weight: 500; }
+
+.btn-buy {
+  width: 100%; padding: 16px;
+  background: linear-gradient(135deg, var(--pink), #aa00cc);
+  border: none; border-radius: 13px; color: #fff;
+  font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 700;
+  letter-spacing: 2px; cursor: pointer;
+  box-shadow: 0 6px 28px rgba(255,45,120,.42);
+  transition: transform .12s, box-shadow .12s;
+  touch-action: manipulation;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.btn-buy:active { transform: scale(.97); box-shadow: 0 3px 14px rgba(255,45,120,.28); }
+
+/* bottom glow */
+.btm-glow {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 110px;
+  background: linear-gradient(transparent, rgba(179,0,255,.05));
+  pointer-events: none; z-index: 0;
+}
+</style>
+</head>
+<body>
+
+<div class="space-bg"></div>
+<div class="stars"></div>
+<div class="btm-glow"></div>
+
+<div class="wrapper">
+  <header>
+    <div class="logo">LUXERA</div>
+    <div class="logo-line"></div>
+    <div class="hero-title">Сувенирные карты</div>
+    <div class="hero-sub">Коллекционные изделия премиального качества</div>
+  </header>
+  <div class="cards" id="cards"></div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="closeOutside(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-img-wrap">
+      <div class="skeleton modal-skel" id="mSkel"></div>
+      <img class="modal-photo" id="mPhoto" src="" alt="" loading="lazy" decoding="async">
+    </div>
+    <div class="modal-body">
+      <div class="modal-mbadge" id="mBadge"></div>
+      <div class="modal-mname"  id="mName"></div>
+      <div class="modal-mprice" id="mPrice"></div>
+      <div class="section-lbl">Комплектация</div>
+      <ul class="feat-list" id="mFeatures"></ul>
+      <div class="section-lbl">Доставка</div>
+      <div class="delivery">
+        <div class="del-row"><span>⚡ Изготовление и отправка</span><span>24 часа</span></div>
+        <div class="del-row"><span>🇷🇺 Доставка по России</span><span>600 ₽</span></div>
+        <div class="del-row"><span>✈️ Доставка за границу</span><span>1 500 ₽</span></div>
+      </div>
+      <button class="btn-buy" onclick="goOrder()">ЗАКАЗАТЬ <span>→</span></button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   ✏️  НАСТРОЙ ФОТОГРАФИИ ЗДЕСЬ
+   Положи 4 фото в одну папку с этим HTML-файлом
+   и укажи имена файлов в поле "img" ниже.
+   Рекомендуемый формат: WebP (см. примечание в конце файла)
+   ════════════════════════════════════════════════════════════════ */
+const TG = 'https://t.me/luxera01';
+
+const products = [
+  {
+    id: 'std',
+    badge: 'СТАНДАРТ', cls: 'b-std',
+    img: 'standard.webp',          // ← ИМЯ ФАЙЛА ФОТО 1
+    name: 'Водительское удостоверение РФ (Стандарт)',
+    short: 'Оригинальный бланк с защитной плёнкой. Чистый вариант без голограмм.',
+    price: '5 000 ₽',
+    feats: ['Оригинальный бланк ВУ', 'Защитная плёнка'],
+    g: ['#00e5ff','#0099cc'],
+  },
+  {
+    id: 'lux',
+    badge: 'ЛЮКС', cls: 'b-lux',
+    img: 'lux.webp',               // ← ИМЯ ФАЙЛА ФОТО 2
+    name: 'Водительское удостоверение РФ (Люкс)',
+    short: 'Оригинальный бланк с голографическим гербом Российской Федерации.',
+    price: '8 000 ₽',
+    feats: ['Оригинальный бланк ВУ', 'Голограмма с гербом РФ', 'Термопласт'],
+    g: ['#ff2d78','#b300ff'],
+  },
+  {
+    id: 'prm',
+    badge: 'ПРАЙМ', cls: 'b-prm',
+    img: 'prime.webp',             // ← ИМЯ ФАЙЛА ФОТО 3
+    name: 'Водительское удостоверение РФ (Прайм)',
+    short: 'Премиальная версия с голограммой «Россия» и покрытием термопластом.',
+    price: '8 000 ₽',
+    feats: ['Оригинальный бланк ВУ', 'Голограмма «Россия»', 'Термопласт'],
+    g: ['#b300ff','#6600cc'],
+  },
+  {
+    id: 'vip',
+    badge: 'ПРЕМИУМ', cls: 'b-vip',
+    img: 'premium.webp',           // ← ИМЯ ФАЙЛА ФОТО 4
+    name: 'Водительское удостоверение РФ (ГИБДД)',
+    short: 'Фирменная голограмма ГИБДД. Максимальная схожесть с реальным документом.',
+    price: '30 000 ₽',
+    feats: ['Оригинальный бланк ВУ', 'Защитная плёнка', 'Фирменная голограмма ГИБДД'],
+    g: ['#ffa500','#ff6600'],
+  },
+];
+
+/* ── render cards ─────────────────────────────────────────────────────────── */
+function render() {
+  document.getElementById('cards').innerHTML = products.map(p => `
+    <div class="card">
+      <div class="card-badge ${p.cls}">${p.badge}</div>
+      <div class="card-img-wrap">
+        <div class="skeleton" id="sk_${p.id}"></div>
+        <img
+          class="prod-photo"
+          id="img_${p.id}"
+          src="${p.img}"
+          alt="${p.name}"
+          loading="lazy"
+          decoding="async"
+          onload="imgLoaded('${p.id}')"
+          onerror="imgError('${p.id}')"
+        >
+      </div>
+      <div class="card-body">
+        <div class="card-name">${p.name}</div>
+        <div class="card-desc">${p.short}</div>
+        <div class="card-price">${p.price}</div>
+        <div class="card-btns">
+          <button class="btn btn-order" onclick="goOrder()">Заказать →</button>
+          <button class="btn btn-detail" onclick="openModal('${p.id}')">Подробнее →</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ── image load callbacks ─────────────────────────────────────────────────── */
+function imgLoaded(id) {
+  document.getElementById('img_'+id)?.classList.add('visible');
+  document.getElementById('sk_'+id)?.classList.add('hidden');
+}
+function imgError(id) {
+  // если файл не найден — скрываем скелетон и показываем заглушку
+  const sk = document.getElementById('sk_'+id);
+  if (sk) {
+    sk.style.animation = 'none';
+    sk.style.background = 'rgba(179,0,255,0.07)';
+    sk.style.display = 'flex';
+    sk.style.alignItems = 'center';
+    sk.style.justifyContent = 'center';
+    sk.innerHTML = '<span style="font-size:13px;color:rgba(255,255,255,.25);font-family:Exo 2,sans-serif">Фото скоро</span>';
+  }
+}
+
+/* ── modal ────────────────────────────────────────────────────────────────── */
+function openModal(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+
+  const photo = document.getElementById('mPhoto');
+  const skel  = document.getElementById('mSkel');
+  photo.classList.remove('visible');
+  skel.classList.remove('hidden');
+  skel.style.cssText = '';
+
+  photo.onload  = () => { photo.classList.add('visible'); skel.classList.add('hidden'); };
+  photo.onerror = () => {
+    skel.style.animation = 'none';
+    skel.style.background = 'rgba(179,0,255,.07)';
+  };
+  photo.src = p.img;
+  photo.alt = p.name;
+
+  const badge = document.getElementById('mBadge');
+  badge.textContent = p.badge;
+  badge.className = 'modal-mbadge';
+  badge.style.cssText = `border-color:${p.g[0]};color:${p.g[0]};background:${p.g[0]}1a`;
+
+  document.getElementById('mName').textContent  = p.name;
+  document.getElementById('mPrice').textContent = p.price;
+  document.getElementById('mFeatures').innerHTML = p.feats.map(f=>`<li>${f}</li>`).join('');
+
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // scroll modal to top
+  document.getElementById('modal').scrollTop = 0;
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function closeOutside(e) { if (e.target === document.getElementById('overlay')) closeModal(); }
+
+/* ── order ────────────────────────────────────────────────────────────────── */
+function goOrder() {
+  if (window.Telegram?.WebApp?.openTelegramLink) {
+    Telegram.WebApp.openTelegramLink(TG);
+  } else {
+    window.open(TG, '_blank');
+  }
+}
+
+/* ── init ─────────────────────────────────────────────────────────────────── */
+render();
+
+if (window.Telegram?.WebApp) {
+  const tg = Telegram.WebApp;
+  tg.expand();
+  tg.setHeaderColor?.('#03020a');
+  tg.setBackgroundColor?.('#03020a');
+}
+</script>
+
+<!--
+═══════════════════════════════════════════════════════════════
+📸  КАКОЙ ФОРМАТ ФОТОГРАФИЙ ИСПОЛЬЗОВАТЬ?
+
+  ✅  РЕКОМЕНДУЮ: WebP
+      — в 2–3 раза легче JPG при том же качестве
+      — быстрее грузится в Telegram WebApp
+      — поддерживается всеми современными устройствами
+
+  📐  ОПТИМАЛЬНЫЕ ПАРАМЕТРЫ:
+      Размер: 800 × 500 px (соотношение ~16:10)
+      Качество: 82–88%
+      Вес файла: 60–130 КБ (не более 200 КБ)
+
+  🔄  КАК КОНВЕРТИРОВАТЬ:
+      • squoosh.app — бесплатно, прямо в браузере
+      • В Photoshop: «Экспортировать как» → WebP
+      • В macOS: Preview → Экспорт → WebP
+
+  📁  КАК ПОДКЛЮЧИТЬ:
+      1. Положи 4 файла в ОДНУ ПАПКУ с этим HTML
+      2. Назови их: standard.webp, lux.webp, prime.webp, premium.webp
+         (или измени имена в массиве products выше)
+      3. Готово — сайт подтянет их автоматически
+
+  ⚡  ДОПОЛНИТЕЛЬНО ДЛЯ СКОРОСТИ:
+      — Не используй PNG для фото (слишком тяжёлые)
+      — JPG тоже подойдёт, просто чуть тяжелее WebP
+═══════════════════════════════════════════════════════════════
+-->
+</body>
+</html>
