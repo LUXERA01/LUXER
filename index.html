@@ -215,30 +215,43 @@ header { text-align: center; padding: 38px 20px 22px; }
 /* ── MODAL ───────────────────────────────────────────────────────────────── */
 .overlay {
   position: fixed; inset: 0; z-index: 200;
-  background: rgba(3,2,10,.93);
+  background: rgba(3,2,10,.96);
   display: none; align-items: center; justify-content: center;
-  backdrop-filter: blur(7px);
+  backdrop-filter: blur(14px);
   overflow-y: auto;
+  -webkit-backdrop-filter: blur(14px);
 }
-.overlay.open { display: flex; animation: overlayIn .3s ease; }
-@keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+.overlay.open { display: flex; animation: overlayIn .35s cubic-bezier(.34,.5,.66,1); }
+@keyframes overlayIn { from { opacity: 0; backdrop-filter: blur(0px); } to { opacity: 1; backdrop-filter: blur(14px); } }
 
 .modal {
-  background: linear-gradient(175deg, #110924 0%, #06031a 100%);
-  border: 1px solid rgba(179,0,255,.38);
-  border-radius: 24px;
-  width: calc(100% - 28px); max-width: 520px; max-height: 88vh;
+  background: linear-gradient(135deg, #1a0d33 0%, #0a0620 50%, #050015 100%);
+  border: 2px solid;
+  border-image: linear-gradient(135deg, rgba(255,45,120,.6), rgba(179,0,255,.5), rgba(0,229,255,.4)) 1;
+  border-radius: 28px;
+  width: calc(100% - 24px); max-width: 520px; max-height: 88vh;
   overflow-y: auto; overflow-x: hidden;
-  animation: zoomIn .4s cubic-bezier(.34,1.4,.64,1);
-  position: relative; padding-bottom: 44px;
+  animation: zoomIn .5s cubic-bezier(.34,1.56,.64,1);
+  position: relative; padding-bottom: 50px;
   -webkit-overflow-scrolling: touch;
   margin: auto;
+  box-shadow: 
+    0 0 40px rgba(255,45,120,.35),
+    0 0 80px rgba(179,0,255,.25),
+    0 0 120px rgba(0,229,255,.15),
+    inset 0 0 40px rgba(179,0,255,.1);
 }
 .modal::before {
-  content: ''; position: sticky; top: 0; display: block; height: 3px;
-  background: linear-gradient(90deg, var(--pink), var(--purple), var(--cyan));
+  content: ''; position: sticky; top: 0; display: block; height: 4px;
+  background: linear-gradient(90deg, var(--pink) 0%, var(--purple) 35%, var(--cyan) 70%, var(--pink) 100%);
   z-index: 10;
   border-radius: 24px 24px 0 0;
+  box-shadow: 0 0 20px rgba(255,45,120,.6), 0 0 40px rgba(179,0,255,.4);
+  animation: gradFlow 4s linear infinite;
+}
+@keyframes gradFlow {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
 }
 @keyframes zoomIn { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: scale(1); } }
 
@@ -260,68 +273,109 @@ header { text-align: center; padding: 38px 20px 22px; }
 
 /* modal image */
 .modal-img-wrap {
-  position: relative; width: 100%; height: 230px; overflow: hidden;
-  margin-top: 4px;
+  position: relative; width: 100%; height: 260px; overflow: hidden;
+  margin-top: 8px;
+  border-bottom: 2px solid rgba(179,0,255,.25);
+  background: linear-gradient(135deg, rgba(0,229,255,.05), rgba(179,0,255,.08));
 }
 .modal-img-wrap::after {
-  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 80px;
-  background: linear-gradient(transparent, #06031a); pointer-events: none; z-index: 1;
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 90px;
+  background: linear-gradient(transparent, rgba(10,6,32,.95)); pointer-events: none; z-index: 2;
 }
 .modal-photo {
   width: 100%; height: 100%; object-fit: cover;
-  opacity: 0; transition: opacity .3s;
+  opacity: 0; transition: opacity .4s cubic-bezier(.34,.5,.66,1);
   decoding: async;
+  filter: contrast(1.08) saturate(1.15);
 }
 .modal-photo.visible { opacity: 1; }
 .modal-skel { position: absolute; inset: 0; }
 
 /* modal content */
-.modal-body { padding: 0 20px 18px; }
+.modal-body { padding: 24px 22px 22px; }
 .modal-mbadge {
   display: inline-block; font-family: 'Orbitron', monospace;
-  font-size: 8px; font-weight: 700; letter-spacing: 2px;
-  padding: 4px 12px; border-radius: 20px; border: 1px solid; margin-bottom: 9px;
+  font-size: 9px; font-weight: 800; letter-spacing: 2.5px;
+  padding: 6px 16px; border-radius: 22px; border: 1.5px solid; margin-bottom: 14px;
+  text-transform: uppercase;
+  box-shadow: 0 0 15px currentColor;
+  animation: badgeGlow .6s ease-in-out infinite alternate;
 }
-.modal-mname  { font-family: 'Orbitron', monospace; font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 8px; line-height: 1.3; }
-.modal-mprice { font-family: 'Orbitron', monospace; font-size: 26px; font-weight: 900; margin-bottom: 16px;
-  background: linear-gradient(135deg, var(--pink), var(--purple));
+@keyframes badgeGlow {
+  from { box-shadow: 0 0 8px currentColor; }
+  to { box-shadow: 0 0 20px currentColor; }
+}
+.modal-mname  { font-family: 'Orbitron', monospace; font-size: 17px; font-weight: 900; color: #fff; margin-bottom: 10px; line-height: 1.35; letter-spacing: .5px; text-shadow: 0 0 12px rgba(255,45,120,.3); }
+.modal-mprice { font-family: 'Orbitron', monospace; font-size: 32px; font-weight: 900; margin-bottom: 24px;
+  background: linear-gradient(135deg, var(--pink) 0%, var(--purple) 50%, var(--cyan) 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  filter: drop-shadow(0 0 10px rgba(255,45,120,.4));
+  filter: drop-shadow(0 0 14px rgba(255,45,120,.5)) drop-shadow(0 0 28px rgba(179,0,255,.3));
+  animation: priceGlow 3s ease-in-out infinite;
+}
+@keyframes priceGlow {
+  0%, 100% { filter: drop-shadow(0 0 14px rgba(255,45,120,.4)) drop-shadow(0 0 20px rgba(179,0,255,.2)); }
+  50% { filter: drop-shadow(0 0 18px rgba(255,45,120,.6)) drop-shadow(0 0 35px rgba(179,0,255,.35)); }
 }
 .section-lbl {
-  font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700;
-  letter-spacing: 3px; color: var(--cyan); text-transform: uppercase; margin-bottom: 10px;
+  font-family: 'Orbitron', monospace; font-size: 10px; font-weight: 800;
+  letter-spacing: 3.5px; color: var(--cyan); text-transform: uppercase; margin-bottom: 14px; margin-top: 22px;
+  text-shadow: 0 0 8px rgba(0,229,255,.4);
 }
-.feat-list { list-style: none; margin-bottom: 18px; }
+.feat-list { list-style: none; margin-bottom: 22px; }
 .feat-list li {
-  font-size: 13px; color: var(--text); padding: 8px 0;
-  border-bottom: 1px solid rgba(255,255,255,.055);
-  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; color: var(--text); padding: 11px 0 11px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  display: flex; align-items: center; gap: 12px;
+  transition: all .2s ease;
+  position: relative;
 }
-.feat-list li::before { content: '◆'; font-size: 7px; color: var(--pink); flex-shrink: 0; }
+.feat-list li:hover {
+  background: rgba(0,229,255,.08);
+  padding-left: 18px;
+  color: var(--cyan);
+}
+.feat-list li::before { content: '◆'; font-size: 8px; color: var(--pink); flex-shrink: 0; filter: drop-shadow(0 0 3px var(--pink)); }
 
 .delivery {
-  background: rgba(0,229,255,.05); border: 1px solid rgba(0,229,255,.14);
-  border-radius: 13px; padding: 14px 15px; margin-bottom: 20px;
+  background: linear-gradient(135deg, rgba(0,229,255,.08), rgba(179,0,255,.06));
+  border: 1.5px solid rgba(0,229,255,.25);
+  border-radius: 16px; padding: 18px 18px; margin-bottom: 26px;
+  box-shadow: 0 0 20px rgba(0,229,255,.15), inset 0 0 15px rgba(0,229,255,.05);
 }
 .del-row {
-  font-size: 12px; color: var(--muted); padding: 5px 0;
+  font-size: 13px; color: var(--muted); padding: 9px 0;
   display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid rgba(0,229,255,.1);
+  transition: all .2s ease;
 }
-.del-row span:last-child { color: var(--cyan); font-weight: 500; }
+.del-row:last-child { border-bottom: none; }
+.del-row:hover { color: var(--cyan); }
+.del-row span:last-child { color: var(--cyan); font-weight: 600; font-family: 'Orbitron', monospace; text-shadow: 0 0 6px rgba(0,229,255,.4); }
 
 .btn-buy {
-  width: 100%; padding: 16px;
-  background: linear-gradient(135deg, var(--pink), #aa00cc);
-  border: none; border-radius: 13px; color: #fff;
-  font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 700;
+  width: 100%; padding: 18px;
+  background: linear-gradient(135deg, var(--pink) 0%, #d6005e 50%, var(--purple) 100%);
+  border: none; border-radius: 16px; color: #fff;
+  font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 800;
   letter-spacing: 2px; cursor: pointer;
-  box-shadow: 0 6px 28px rgba(255,45,120,.42);
-  transition: transform .12s, box-shadow .12s;
+  box-shadow: 
+    0 8px 32px rgba(255,45,120,.45),
+    0 0 20px rgba(179,0,255,.25),
+    inset 0 1px 0 rgba(255,255,255,.15);
+  transition: all .2s cubic-bezier(.34,.5,.66,1);
   touch-action: manipulation;
-  display: flex; align-items: center; justify-content: center; gap: 10px;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  text-transform: uppercase;
+  animation: btnGlow 2s ease-in-out infinite;
 }
-.btn-buy:active { transform: scale(.97); box-shadow: 0 3px 14px rgba(255,45,120,.28); }
+@keyframes btnGlow {
+  0%, 100% { box-shadow: 0 8px 32px rgba(255,45,120,.35), 0 0 20px rgba(179,0,255,.15), inset 0 1px 0 rgba(255,255,255,.15); }
+  50% { box-shadow: 0 10px 40px rgba(255,45,120,.55), 0 0 30px rgba(179,0,255,.35), inset 0 1px 0 rgba(255,255,255,.25); }
+}
+.btn-buy:active { 
+  transform: scale(.96);
+  box-shadow: 0 4px 16px rgba(255,45,120,.3), 0 0 12px rgba(179,0,255,.15), inset 0 1px 0 rgba(255,255,255,.1);
+}
 
 /* bottom glow */
 .btm-glow {
@@ -535,35 +589,5 @@ if (window.Telegram?.WebApp) {
 }
 </script>
 
-<!--
-═══════════════════════════════════════════════════════════════
-📸  КАКОЙ ФОРМАТ ФОТОГРАФИЙ ИСПОЛЬЗОВАТЬ?
-
-  ✅  РЕКОМЕНДУЮ: WebP
-      — в 2–3 раза легче JPG при том же качестве
-      — быстрее грузится в Telegram WebApp
-      — поддерживается всеми современными устройствами
-
-  📐  ОПТИМАЛЬНЫЕ ПАРАМЕТРЫ:
-      Размер: 800 × 500 px (соотношение ~16:10)
-      Качество: 82–88%
-      Вес файла: 60–130 КБ (не более 200 КБ)
-
-  🔄  КАК КОНВЕРТИРОВАТЬ:
-      • squoosh.app — бесплатно, прямо в браузере
-      • В Photoshop: «Экспортировать как» → WebP
-      • В macOS: Preview → Экспорт → WebP
-
-  📁  КАК ПОДКЛЮЧИТЬ:
-      1. Положи 4 файла в ОДНУ ПАПКУ с этим HTML
-      2. Назови их: standard.webp, lux.webp, prime.webp, premium.webp
-         (или измени имена в массиве products выше)
-      3. Готово — сайт подтянет их автоматически
-
-  ⚡  ДОПОЛНИТЕЛЬНО ДЛЯ СКОРОСТИ:
-      — Не используй PNG для фото (слишком тяжёлые)
-      — JPG тоже подойдёт, просто чуть тяжелее WebP
-═══════════════════════════════════════════════════════════════
--->
 </body>
 </html>
